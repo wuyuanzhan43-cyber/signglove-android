@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(b.root)
 
         settings = Settings(this)
-        b.tvTitle.text = "🧤 手语手套 · 智能监测  v1.3"
+        b.tvTitle.text = "🧤 手语手套 · 智能监测  v1.4"
         tts = TextToSpeech(this) { if (it == TextToSpeech.SUCCESS) tts?.language = Locale.CHINA }
 
         composer = SentenceComposer(settings,
