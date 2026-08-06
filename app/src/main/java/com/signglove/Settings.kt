@@ -82,4 +82,14 @@ class Settings(ctx: Context) {
     var lastBluetoothMac: String
         get() = sp.getString("last_bluetooth_mac", "") ?: ""
         set(v) { sp.edit().putString("last_bluetooth_mac", v).apply() }
+
+    /** 多候选语义模式: 停顿后列出多个候选句, 数字手势/点击选择; false=单句直接播报。 */
+    var multiMode: Boolean
+        get() = sp.getBoolean("multi_mode", true)
+        set(v) { sp.edit().putBoolean("multi_mode", v).apply() }
+
+    /** 候选句数量 (1~5, 默认 3)。仅 multiMode 时生效。 */
+    var candidateCount: Int
+        get() = sp.getInt("candidate_count", 3)
+        set(v) { sp.edit().putInt("candidate_count", v.coerceIn(1, 5)).apply() }
 }

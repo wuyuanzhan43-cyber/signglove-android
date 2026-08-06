@@ -29,6 +29,8 @@ class SettingsActivity : AppCompatActivity() {
         b.etDsKey.setText(settings.deepseekKey)
         b.etDeepseekPrompt.setText(settings.deepseekPrompt)
         b.swPromptEditorVisible.isChecked = settings.deepseekPromptVisible
+        b.swMultiMode.isChecked = settings.multiMode
+        b.etCandidateCount.setText(settings.candidateCount.toString())
         b.promptEditorSection.visibility =
             if (settings.deepseekPromptVisible) View.VISIBLE else View.GONE
 
@@ -50,6 +52,8 @@ class SettingsActivity : AppCompatActivity() {
             settings.userName = b.etName.text.toString().trim().ifBlank { "手语手套用户" }
             settings.deepseekKey = b.etDsKey.text.toString().trim()
             settings.deepseekPrompt = b.etDeepseekPrompt.text.toString().trim()
+            settings.multiMode = b.swMultiMode.isChecked
+            settings.candidateCount = b.etCandidateCount.text.toString().trim().toIntOrNull()?.coerceIn(1, 5) ?: 3
             Toast.makeText(this, "✓ 设置已保存", Toast.LENGTH_SHORT).show()
             finish()
         }

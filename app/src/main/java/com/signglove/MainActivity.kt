@@ -9,8 +9,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
+import android.util.TypedValue
 import android.view.KeyEvent
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -49,13 +52,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(b.root)
 
         settings = Settings(this)
-        b.tvTitle.text = "🧤 手语手套 · 智能监测  v2.5"
+        b.tvTitle.text = "🧤 手语手套 · 智能监测  v2.6"
         initTts()
 
         composer = SentenceComposer(settings,
             onWord = { w -> flow.append(if (flow.isEmpty()) "" else " ").append(w)
                 b.tvFlow.text = "手势词: $flow"; b.tvStatus.text = "… 组句中" },
             onComposing = { flow.clear(); b.tvFlow.text = ""; b.tvStatus.text = "… 组句中" },
+            onCandidates = { list -> onCandidates(list) },
             onSentence = { text, src -> onSentence(text, src) })
 
         vitals = Vitals(
@@ -168,6 +172,12 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (GestureMap.isIdle(name)) return
+        // 多候选等待态: 数字手势 one/two/three/four = 选择对应候选
+        if (settings.multiMode && composer.hasCandidates()) {
+            val idx = GestureMap.selectIndex(name)
+            if (idx != null) { composer.selectCandidate(idx); return }
+            // 非数字新手势 → 交给 feed(放弃候选并开始新一句)
+        }
         val word = GestureMap.word(name)
         if (word == null) {
             b.tvStatus.text = "未配置手势词：$name"
@@ -199,6 +209,7 @@ class MainActivity : AppCompatActivity() {
         speak(text)
         val tag = when (src) {
             "deepseek" -> "[☁DeepSeek]"
+            "deepseek_multi" -> "[☁DeepSeek·多候选]"
             "local_realtime" -> "[即时识别]"
             "local_single" -> "[单词直显]"
             "local_disabled" -> "[直拼·DeepSeek已关闭]"
@@ -209,6 +220,37 @@ class MainActivity : AppCompatActivity() {
         history.insert(0, "• $text  $tag\n")
         b.tvHistory.text = history.toString()
     }
+
+    /** 多候选语义: 展示可点击候选列表并进入等待态; null 清空列表。 */
+    private fun onCandidates(list: List<String>?) {
+        b.llCandidates.removeAllViews()
+        if (list == null) return
+        b.tvGesture.text = "✋ 请选择语义"
+        b.tvStatus.text = "打数字手势 1~${list.size} 或点击下方选项；打其他手势开始新句子"
+        b.tvFlow.text = ""
+        list.forEachIndexed { i, s ->
+            val tv = TextView(this).apply {
+                text = "${i + 1}. $s"
+                textSize = 16f
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.txt))
+                setBackgroundColor(0x0D000000)
+                isClickable = true
+                val outValue = TypedValue()
+                theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+                foreground = getDrawable(outValue.resourceId)
+                setPadding(dp(12), dp(10), dp(12), dp(10))
+                setOnClickListener { composer.selectCandidate(i + 1) }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(4) }
+            }
+            b.llCandidates.addView(tv)
+        }
+    }
+
+    /** dp → px。 */
+    private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
 
     private fun showVitals(v: VitalsData) {
         if (!connected) {

@@ -91,5 +91,17 @@ object GestureMap {
         return name.trim().takeIf { value -> value.any { it.code in 0x3400..0x9FFF } }
     }
 
+    /**
+     * 解析"选择候选句"的手势序号: 当前固件数字手势 one/two/three/four、
+     * 37 类别名 num_1..num_4、半角/全角/中文数字 → 1~4; 其他返回 null。
+     */
+    fun selectIndex(name: String): Int? = when (normalize(name)) {
+        "one", "num_1", "1", "一", "１" -> 1
+        "two", "num_2", "2", "二", "２" -> 2
+        "three", "num_3", "3", "三", "３" -> 3
+        "four", "num_4", "4", "四", "４" -> 4
+        else -> null
+    }
+
     private fun normalize(name: String): String = name.trim().lowercase(Locale.ROOT)
 }
