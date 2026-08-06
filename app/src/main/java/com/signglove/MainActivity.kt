@@ -11,6 +11,7 @@ import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.util.TypedValue
 import android.view.KeyEvent
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(b.root)
 
         settings = Settings(this)
-        b.tvTitle.text = "🧤 手语手套 · 智能监测  v2.6"
+        b.tvTitle.text = "🧤 手语手套 · 智能监测  v2.7"
         initTts()
 
         composer = SentenceComposer(settings,
@@ -163,6 +164,10 @@ class MainActivity : AppCompatActivity() {
             if (!settings.autoSos) { toast("请先打开自动报警开关"); return@setOnClickListener }
             toast("注入异常生命体征…"); vitals.injectDanger()
         }
+
+        // 语义选择演示（设置页隐藏开关开启后可见）: 无需云端/硬件, 演示多候选选择流程
+        b.btnDemo.visibility = if (settings.demoMode) View.VISIBLE else View.GONE
+        b.btnDemo.setOnClickListener { composer.demoCandidates() }
     }
 
     private fun handleGestureName(name: String) {
@@ -447,6 +452,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        b.btnDemo.visibility = if (settings.demoMode) View.VISIBLE else View.GONE
         if (hasBt()) {
             if (connected) lockDeviceListToConnectedDevice() else refreshDevices()
         }

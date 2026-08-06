@@ -229,6 +229,16 @@
                     android:text="⚠️ 模拟生命体征异常（测试报警）"
                     android:textColor="@color/bad" />
 
+                <Button
+                    android:id="@+id/btnDemo"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="▶ 演示语义选择"
+                    android:textColor="@color/blue"
+                    android:visibility="gone" />
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

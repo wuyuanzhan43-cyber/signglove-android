@@ -73,6 +73,14 @@
                 android:inputType="textMultiLine"
                 android:minLines="8"
                 android:textSize="14sp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/swDemoMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="🎬 语义选择演示（主界面显示演示按钮，无需云端/硬件）"
+                android:textColor="@color/txt" />
         </LinearLayout>
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"

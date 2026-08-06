@@ -31,6 +31,7 @@ class SettingsActivity : AppCompatActivity() {
         b.swPromptEditorVisible.isChecked = settings.deepseekPromptVisible
         b.swMultiMode.isChecked = settings.multiMode
         b.etCandidateCount.setText(settings.candidateCount.toString())
+        b.swDemoMode.isChecked = settings.demoMode
         b.promptEditorSection.visibility =
             if (settings.deepseekPromptVisible) View.VISIBLE else View.GONE
 
@@ -54,6 +55,7 @@ class SettingsActivity : AppCompatActivity() {
             settings.deepseekPrompt = b.etDeepseekPrompt.text.toString().trim()
             settings.multiMode = b.swMultiMode.isChecked
             settings.candidateCount = b.etCandidateCount.text.toString().trim().toIntOrNull()?.coerceIn(1, 5) ?: 3
+            settings.demoMode = b.swDemoMode.isChecked
             Toast.makeText(this, "✓ 设置已保存", Toast.LENGTH_SHORT).show()
             finish()
         }

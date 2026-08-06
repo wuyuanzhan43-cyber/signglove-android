@@ -51,6 +51,14 @@ class SentenceComposer(
     /** 是否处于候选等待态(供 MainActivity 拦截数字选择手势)。主线程调用。 */
     fun hasCandidates(): Boolean = candidates != null
 
+    /** 语义选择演示: 无需云端, 直接展示一组内置候选并进入等待态(演示选择交互)。主线程调用。 */
+    fun demoCandidates() {
+        if (candidates != null) abandon()
+        val list = listOf("我想喝水", "我要去接点水", "我渴了想喝东西")
+        candidates = list
+        onCandidates(list)
+    }
+
     /** 选择第 index 个候选并播报 (数字手势/屏幕点选入口)。越界忽略。主线程调用。 */
     fun selectCandidate(index: Int) {
         val list = candidates ?: return

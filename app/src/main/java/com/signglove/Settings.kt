@@ -92,4 +92,9 @@ class Settings(ctx: Context) {
     var candidateCount: Int
         get() = sp.getInt("candidate_count", 3)
         set(v) { sp.edit().putInt("candidate_count", v.coerceIn(1, 5)).apply() }
+
+    /** 语义选择演示: 主界面显示"演示语义选择"按钮, 无需云端/硬件即可演示多候选选择流程。 */
+    var demoMode: Boolean
+        get() = sp.getBoolean("demo_mode", false)
+        set(v) { sp.edit().putBoolean("demo_mode", v).apply() }
 }
