@@ -170,18 +170,19 @@ class MainActivity : AppCompatActivity() {
                 val outValue = TypedValue()
                 theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
                 foreground = getDrawable(outValue.resourceId)
-                setPadding(12.dp, 10.dp, 12.dp, 10.dp)
+                setPadding(dp(12), dp(10), dp(12), dp(10))
                 setOnClickListener { composer.selectCandidate(i + 1) }
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { topMargin = 4.dp }
+                ).apply { topMargin = dp(4) }
             }
             b.llCandidates.addView(tv)
         }
     }
 
-    private fun Int.dp() = (this * resources.displayMetrics.density).toInt()
+    /** dp → px (普通成员函数, 避免成员扩展函数在 lambda 内解析歧义)。 */
+    private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
 
     private fun showVitals(v: VitalsData) {
         b.tvHr.text = "❤️\n${v.hr}\nBPM"
