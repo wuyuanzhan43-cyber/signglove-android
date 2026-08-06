@@ -119,6 +119,14 @@
                     android:gravity="center"
                     android:textColor="@color/mut"
                     android:textSize="13sp" />
+
+                <!-- 多候选语义: 动态添加可点击候选句 -->
+                <LinearLayout
+                    android:id="@+id/llCandidates"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

@@ -9,7 +9,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
+import android.util.TypedValue
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -35,14 +38,22 @@ class MainActivity : AppCompatActivity() {
     private val main = Handler(Looper.getMainLooper())
     private var sosDialog: AlertDialog? = null
 
-    // 手势模拟: 发一组(2~4)词 → 停顿(>pauseSec)触发组句 → 再发下一组
+    // 手势模拟: 发一组(2~4)词 → 停顿(>pauseSec)触发组句 → 再发下一组;
+    // 多候选模式下若已出候选, 则模拟打数字手势 1~4 选择(走手势选择路径)。
     private var simRunning = false
     private var simWordsLeft = 0
     private val simNames = listOf("fist", "open", "point", "victory", "ok")
+    private val simSelNames = listOf("one", "two", "three", "four")
     private val simTick = object : Runnable {
         override fun run() {
             if (!simRunning) return
-            GestureMap.word(simNames[Random.nextInt(simNames.size)])?.let { composer.feed(it) }
+            if (settings.multiMode && composer.hasCandidates()) {
+                composer.feed(simSelNames[Random.nextInt(simSelNames.size)])  // 模拟打数字手势选候选
+                simWordsLeft = 0
+                main.postDelayed(this, (settings.pauseSec * 1000).toLong() + 1200)
+                return
+            }
+            composer.feed(simNames[Random.nextInt(simNames.size)])
             simWordsLeft--
             if (simWordsLeft > 0) {
                 main.postDelayed(this, (600 + Random.nextInt(400)).toLong())  // 词间 0.6~1.0s
@@ -62,13 +73,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(b.root)
 
         settings = Settings(this)
-        b.tvTitle.text = "🧤 手语手套 · 智能监测  v1.4"
+        b.tvTitle.text = "🧤 手语手套 · 智能监测  v1.5"
         tts = TextToSpeech(this) { if (it == TextToSpeech.SUCCESS) tts?.language = Locale.CHINA }
 
         composer = SentenceComposer(settings,
             onWord = { w -> flow.append(if (flow.isEmpty()) "" else " ").append(w)
                 b.tvFlow.text = "手势词: $flow"; b.tvStatus.text = "… 组句中" },
             onComposing = { flow.clear(); b.tvFlow.text = ""; b.tvStatus.text = "… 组句中" },
+            onCandidates = { list -> onCandidates(list) },
             onSentence = { text, src -> onSentence(text, src) })
 
         vitals = Vitals(
@@ -81,8 +93,7 @@ class MainActivity : AppCompatActivity() {
 
         bt = BluetoothBle(
             ctx = this,
-            onLine = { line -> GestureMap.parseGesture(line)?.let { name ->
-                GestureMap.word(name)?.let { composer.feed(it) } } },
+            onLine = { line -> GestureMap.parseGesture(line)?.let { composer.feed(it) } },
             onState = { c -> connected = c
                 b.tvBle.text = if (c) "蓝牙: 已连接" else "蓝牙: 未连接"
                 b.btnConnect.text = if (c) "⏏ 断开" else "🔌 连接" })
@@ -132,6 +143,7 @@ class MainActivity : AppCompatActivity() {
         speak(text)
         val tag = when (src) {
             "deepseek" -> "[☁DeepSeek]"
+            "deepseek_multi" -> "[☁DeepSeek·多候选]"
             "local" -> "[直拼·未配Key]"
             "fallback" -> "[回退·DeepSeek失败]"
             "demo" -> "[演示]"
@@ -140,6 +152,36 @@ class MainActivity : AppCompatActivity() {
         history.insert(0, "• $text  $tag\n")
         b.tvHistory.text = history.toString()
     }
+
+    /** 多候选语义: 展示可点击候选列表并进入等待态; null 清空列表。 */
+    private fun onCandidates(list: List<String>?) {
+        b.llCandidates.removeAllViews()
+        if (list == null) return
+        b.tvGesture.text = "✋ 请选择语义"
+        b.tvStatus.text = "打数字手势 1~${list.size} 或点击下方选项；打其他手势开始新句子"
+        b.tvFlow.text = ""
+        list.forEachIndexed { i, s ->
+            val tv = TextView(this).apply {
+                text = "${i + 1}. $s"
+                textSize = 16f
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.txt))
+                setBackgroundColor(0x0D000000)
+                isClickable = true
+                val outValue = TypedValue()
+                theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+                foreground = getDrawable(outValue.resourceId)
+                setPadding(12.dp, 10.dp, 12.dp, 10.dp)
+                setOnClickListener { composer.selectCandidate(i + 1) }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = 4.dp }
+            }
+            b.llCandidates.addView(tv)
+        }
+    }
+
+    private fun Int.dp() = (this * resources.displayMetrics.density).toInt()
 
     private fun showVitals(v: VitalsData) {
         b.tvHr.text = "❤️\n${v.hr}\nBPM"

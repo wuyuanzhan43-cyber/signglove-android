@@ -24,6 +24,8 @@ class SettingsActivity : AppCompatActivity() {
         b.etName.setText(settings.userName)
         b.etDsKey.setText(settings.deepseekKey)
         b.etPause.setText(settings.pauseSec.toString())
+        b.swMultiMode.isChecked = settings.multiMode
+        b.etCandidateCount.setText(settings.candidateCount.toString())
 
         b.btnSave.setOnClickListener {
             settings.serverchan = b.etServerchan.text.toString().trim()
@@ -31,6 +33,8 @@ class SettingsActivity : AppCompatActivity() {
             settings.userName = b.etName.text.toString().trim().ifBlank { "手语手套用户" }
             settings.deepseekKey = b.etDsKey.text.toString().trim()
             settings.pauseSec = b.etPause.text.toString().trim().toFloatOrNull() ?: 2.5f
+            settings.multiMode = b.swMultiMode.isChecked
+            settings.candidateCount = b.etCandidateCount.text.toString().trim().toIntOrNull()?.coerceIn(1, 5) ?: 3
             Toast.makeText(this, "✓ 设置已保存", Toast.LENGTH_SHORT).show()
             finish()
         }

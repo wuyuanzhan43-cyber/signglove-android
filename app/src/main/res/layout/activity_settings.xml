@@ -43,6 +43,24 @@
         <EditText android:id="@+id/etPause" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:hint="2.5" android:inputType="numberDecimal" android:textSize="14sp" />
 
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="22dp" android:text="🔀 语义选择（多候选组句）" android:textColor="@color/txt"
+            android:textSize="16sp" android:textStyle="bold" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swMultiMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:checked="true"
+            android:text="多候选模式：停顿后列出多个候选句，数字手势或点击选择"
+            android:textColor="@color/txt" />
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" android:text="候选数量（1~5）" android:textColor="@color/txt" />
+        <EditText android:id="@+id/etCandidateCount" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="3" android:inputType="number" android:textSize="14sp" />
+
         <Button android:id="@+id/btnSave" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="22dp" android:text="💾 保存设置" />
 
